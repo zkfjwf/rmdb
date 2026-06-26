@@ -39,16 +39,19 @@ struct Value {
     std::shared_ptr<RmRecord> raw;  // raw record buffer
 
     void set_int(int int_val_) {
+        raw.reset();
         type = TYPE_INT;
         int_val = int_val_;
     }
 
     void set_float(float float_val_) {
+        raw.reset();
         type = TYPE_FLOAT;
         float_val = float_val_;
     }
 
     void set_str(std::string str_val_) {
+        raw.reset();
         type = TYPE_STRING;
         str_val = std::move(str_val_);
     }
@@ -71,6 +74,17 @@ struct Value {
         }
     }
 };
+
+inline bool coerce_value_to_col_type(Value &val, ColType target_type) {
+    if (val.type == target_type) {
+        return true;
+    }
+    if (target_type == TYPE_FLOAT && val.type == TYPE_INT) {
+        val.set_float(static_cast<float>(val.int_val));
+        return true;
+    }
+    return false;
+}
 
 enum CompOp { OP_EQ, OP_NE, OP_LT, OP_GT, OP_LE, OP_GE };
 

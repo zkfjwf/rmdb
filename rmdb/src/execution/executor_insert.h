@@ -43,10 +43,12 @@ class InsertExecutor : public AbstractExecutor {
         for (size_t i = 0; i < values_.size(); i++) {
             auto &col = tab_.cols[i];
             auto &val = values_[i];
-            if (col.type != val.type) {
+            if (!coerce_value_to_col_type(val, col.type)) {
                 throw IncompatibleTypeError(coltype2str(col.type), coltype2str(val.type));
             }
-            val.init_raw(col.len);
+            if (val.raw == nullptr) {
+                val.init_raw(col.len);
+            }
             memcpy(rec.data + col.offset, val.raw->data, col.len);
         }
         // Insert into record file

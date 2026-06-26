@@ -211,7 +211,10 @@ public:
 /* 日志管理器，负责把日志写入日志缓冲区，以及把日志缓冲区中的内容写入磁盘中 */
 class LogManager {
 public:
-    LogManager(DiskManager* disk_manager) { disk_manager_ = disk_manager; }
+    LogManager(DiskManager* disk_manager) {
+        disk_manager_ = disk_manager;
+        persist_lsn_ = INVALID_LSN;
+    }
     
     lsn_t add_log_to_buffer(LogRecord* log_record);
     void flush_log_to_disk();

@@ -38,7 +38,21 @@ class UpdateExecutor : public AbstractExecutor {
         context_ = context;
     }
     std::unique_ptr<RmRecord> Next() override {
-        
+        for (auto &rid : rids_) {
+            auto record = fh_->get_record(rid, context_);
+            RmRecord new_record(*record);
+            for (auto &set_clause : set_clauses_) {
+                auto col = tab_.get_col(set_clause.lhs.col_name);
+                if (!coerce_value_to_col_type(set_clause.rhs, col->type)) {
+                    throw IncompatibleTypeError(coltype2str(col->type), coltype2str(set_clause.rhs.type));
+                }
+                if (set_clause.rhs.raw == nullptr) {
+                    set_clause.rhs.init_raw(col->len);
+                }
+                memcpy(new_record.data + col->offset, set_clause.rhs.raw->data, col->len);
+            }
+            fh_->update_record(rid, new_record.data, context_);
+        }
         return nullptr;
     }
 

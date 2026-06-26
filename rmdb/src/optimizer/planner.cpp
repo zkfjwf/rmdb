@@ -24,7 +24,11 @@ See the Mulan PSL v2 for more details. */
 
 // 目前的索引匹配规则为：完全匹配索引字段，且全部为单点查询，不会自动调整where条件的顺序
 bool Planner::get_index_cols(std::string tab_name, std::vector<Condition> curr_conds, std::vector<std::string>& index_col_names) {
+    (void)tab_name;
+    (void)curr_conds;
     index_col_names.clear();
+    return false;
+#if 0
     for(auto& cond: curr_conds) {
         if(cond.is_rhs_val && cond.op == OP_EQ && cond.lhs_col.tab_name.compare(tab_name) == 0)
             index_col_names.push_back(cond.lhs_col.col_name);
@@ -32,6 +36,7 @@ bool Planner::get_index_cols(std::string tab_name, std::vector<Condition> curr_c
     TabMeta& tab = sm_manager_->db_.get_table(tab_name);
     if(tab.is_index(index_col_names)) return true;
     return false;
+#endif
 }
 
 /**
@@ -239,8 +244,8 @@ std::shared_ptr<Plan> Planner::make_one_rel(std::shared_ptr<Query> query)
     //连接剩余表
     for (size_t i = 0; i < tables.size(); i++) {
         if(scantbl[i] == -1) {
-            table_join_executors = std::make_shared<JoinPlan>(T_NestLoop, std::move(table_scan_executors[i]), 
-                                                    std::move(table_join_executors), std::vector<Condition>());
+            table_join_executors = std::make_shared<JoinPlan>(T_NestLoop, std::move(table_join_executors),
+                                                    std::move(table_scan_executors[i]), std::vector<Condition>());
         }
     }
 

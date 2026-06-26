@@ -26,6 +26,7 @@ class Transaction {
         lock_set_ = std::make_shared<std::unordered_set<LockDataId>>();
         index_latch_page_set_ = std::make_shared<std::deque<Page *>>();
         index_deleted_page_set_ = std::make_shared<std::deque<Page*>>();
+        txn_mode_ = false;
         prev_lsn_ = INVALID_LSN;
         thread_id_ = std::this_thread::get_id();
     }
